@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPTPhoto Editing - โปรแกรมตัดรูปภาพและเล่นเพลง</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <!-- หน้าต่างถามเล่นเพลงเมื่อเปิดครั้งแรก -->
+    <div class="music-question-modal" id="musicQuestionModal">
+        <div class="music-question-box">
+            <div class="music-question-title">🎵 จะฟังเพลงขณะทำงานเพลินๆไหมครับเจ้านาย?</div>
+            <div class="music-question-text">เลือก "จัดมา" เพื่อเปิดเครื่องเล่นเพลง หรือเลือก "ยังไม่เอา" เพื่อปิดเครื่องเล่นเพลง</div>
+            <div class="music-question-buttons">
+                <button class="music-question-btn yes" id="yesMusicBtn">จัดมา</button>
+                <button class="music-question-btn no" id="noMusicBtn">ยังไม่เอา</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <div class="page-navigation">
+            <button class="nav-button active" data-page="page1">หน้า 1 - ตัดรูปเป็นวงกลม</button>
+            <button class="nav-button" data-page="page2">หน้า 2 - แก้ไขรูปภาพขั้นสูง</button>
+            <button class="nav-button ai" data-page="page3">หน้า 3 - AI ลบแสงจ้า</button>
+        </div>
+        
+        <!-- หน้าที่ 1 - ตัดรูปเป็นวงกลม -->
+        <div id="page1" class="page active">
+            <div class="panel">
+                <h1>BPTPhoto editing🎙️</h1>
+                <div class="file-input-container">
+                    <label class="file-input-label">📷 เลือกรูปภาพ</label>
+                    <input id="file1" type="file" accept="image/*">
+                </div>
+                <div class="controls">
+                    <button id="reset1" class="secondary">รีเซ็ต</button>
+                    <button id="export1">บันทึก PNG</button>
+                    <button id="clear1" class="secondary">ลบรูป</button>
+                </div>
+                <div class="voice-status inactive" id="voiceStatus1">
+                    <span></span> ระบบฟังเสียง: พูด "บันทึก", "ลบ", "ปิดระบบ", "ขอรูป", "ย้าย"
+                </div>
+                <div class="note">
+                    พูดว่า "บันทึก" หรือ "Save" เพื่อบันทึกรูป<br>
+                    พูดว่า "ลบ" เพื่อเคลียร์รูปและ selection<br>
+                    พูดว่า "ปิดระบบ" เพื่อปิดหน้าต่าง<br>
+                    พูดว่า "ขอรูป" เพื่อเลือกรูปภาพใหม่<br>
+                    พูดว่า "ย้าย" เพื่อย้ายเครื่องเล่นเพลง<br>
+                    พูดว่า "เปลี่ยนเพลง" เพื่อเลือกเพลงใหม่<br>
+                    พูดว่า "เบาเสียง" หรือ "เพิ่มเสียง" เพื่อควบคุมระดับเสียง<br>
+                    พูดว่า "เพลงถัดไป" หรือ "เพลงก่อนหน้า" เพื่อเปลี่ยนเพลง
+                </div>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="mainCanvas1"></canvas>
+                <div class="preview-section">
+                    <div class="preview" id="preview1"><span>ยังไม่มีรูป</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- หน้าที่ 2 - แก้ไขรูปภาพขั้นสูง -->
+        <div id="page2" class="page">
+            <div class="panel">
+                <h1>BPTPhoto Advanced Editing</h1>
+                <div class="file-input-container">
+                    <label class="file-input-label">📷 เลือกรูปภาพ</label>
+                    <input id="file2" type="file" accept="image/*">
+                </div>
+                
+                <div class="controls">
+                    <button id="zoomIn" class="tooltip">ซูมเข้า<span class="tooltiptext">หรือพูดว่า "ซูมเข้า" หรือ "Zoom in"</span></button>
+                    <button id="zoomOut" class="tooltip">ซูมออก<span class="tooltiptext">หรือพูดว่า "ซูมออก" หรือ "Zoom out"</span></button>
+                    <button id="reset2" class="tooltip">รีเซ็ต<span class="tooltiptext">หรือพูดว่า "รีเซ็ต" หรือ "Reset"</span></button>
+                    <button id="savePNG" class="tooltip">บันทึก PNG<span class="tooltiptext">หรือพูดว่า "บันทึก" หรือ "Save"</span></button>
+                    <button id="undo" class="tooltip">ย้อนกลับ<span class="tooltiptext">หรือพูดว่า "ย้อนกลับ" หรือ "Undo"</span></button>
+                    <button id="clearAll" class="tooltip">ล้างทั้งหมด<span class="tooltiptext">หรือพูดว่า "ลบ" หรือ "ล้างทั้งหมด"</span></button>
+                </div>
+                
+                <div class="voice-status inactive" id="voiceStatus">
+                    <span></span> ระบบฟังเสียง: พูด "ซูมเข้า", "ซูมออก", "บันทึก", "ย้อนกลับ", "ขอรูป", "ย้าย", "เปลี่ยนเพลง", "เบาเสียง", "เพิ่มเสียง"
+                </div>
+                <div class="note">
+                    Shift+ลากวาดวงกลม, Alt+ลากวาดลูกศร<br>
+                    พิมพ์ข้อความแล้ว Enter, ลากข้อความ/วงกลม/ลูกศรได้<br>
+                    สั่งงานด้วยเสียงได้ทั้งหมด<br>
+                    พูดว่า "ขอรูป" เพื่อเลือกรูปภาพใหม่<br>
+                    พูดว่า "ย้าย" เพื่อย้ายเครื่องเล่นเพลง<br>
+                    พูดว่า "เปลี่ยนเพลง" เพื่อเลือกเพลงใหม่<br>
+                    พูดว่า "เบาเสียง" หรือ "เพิ่มเสียง" เพื่อควบคุมระดับเสียง<br>
+                    พูดว่า "เพลงถัดไป" หรือ "เพลงก่อนหน้า" เพื่อเปลี่ยนเพลง
+                </div>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="mainCanvas2" width="1200" height="600"></canvas>
+            </div>
+        </div>
+        
+        <!-- หน้าที่ 3 - AI ลบแสงจ้า Pro -->
+        <div id="page3" class="page">
+            <div class="panel panel-ai">
+                <h2>Glare Remover AI Pro</h2>
+                <div class="file-input-container">
+                    <label class="file-input-label ai">📷 เลือกรูปภาพที่มีแสงจ้าหรือเงาไฟ</label>
+                    <input id="file3" type="file" accept="image/*">
+                </div>
+                
+                <div class="ai-controls">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>ลดแสงจ้า (Highlight)</span>
+                            <span id="highlightValue">40%</span>
+                        </div>
+                        <input type="range" id="highlight" min="0" max="100" value="40">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>ลดแสงสะท้อน (Glare)</span>
+                            <span id="glareValue">30%</span>
+                        </div>
+                        <input type="range" id="glare" min="0" max="100" value="30">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>เพิ่มความคมชัด (Sharpen)</span>
+                            <span id="sharpValue">100%</span>
+                        </div>
+                        <input type="range" id="sharp" min="0" max="200" value="100">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>ลดเงาดำ (Shadow)</span>
+                            <span id="shadowValue">60%</span>
+                        </div>
+                        <input type="range" id="shadow" min="0" max="100" value="60">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Diffuse / ลบกระจกสะท้อน</span>
+                            <span id="diffuseValue">20%</span>
+                        </div>
+                        <input type="range" id="diffuse" min="0" max="100" value="20">
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h3 style="margin-bottom: 16px; color: #00c8ff;">ลบแสงเฉพาะจุด (คลิกบนรูป)</h3>
+                
+                <div class="controls">
+                    <button id="autoAI" class="ai" style="flex: 2;">✨ ลบแสงอัตโนมัติ (AI 1 คลิก)</button>
+                    <button id="reset3" class="secondary">รีเซ็ต</button>
+                    <button id="download3" class="ai">ดาวน์โหลดภาพ</button>
+                </div>
+                
+                <div class="voice-status ai inactive" id="voiceStatus3">
+                    <span></span> ระบบฟังเสียง: พูด "ลบแสง", "รีเซ็ต", "ดาวน์โหลด", "ออโต้"
+                </div>
+                <div class="note">
+                    คลิกบนจุดแสงจ้าในภาพเพื่อลบแสงเฉพาะจุด<br>
+                    พูดว่า "ลบแสง" เพื่อลบแสงอัตโนมัติทั้งภาพ<br>
+                    พูดว่า "รีเซ็ต" เพื่อรีเซ็ตการตั้งค่า<br>
+                    พูดว่า "ดาวน์โหลด" เพื่อบันทึกรูปภาพ<br>
+                    พูดว่า "ออโต้" สำหรับ AI ลบแสงอัตโนมัติ<br>
+                    พูดว่า "ย้าย" เพื่อย้ายเครื่องเล่นเพลง
+                </div>
+            </div>
+
+            <div class="canvas-wrap">
+                <canvas id="canvas3"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- เพิ่มระบบเล่นเพลงแบบเพลย์ลิสต์ -->
+    <div class="music-player" id="musicPlayer">
+        <div class="music-header">
+            <div class="music-title">🎵 เครื่องเล่นเพลง</div>
+            <button class="music-toggle" id="musicToggle">-</button>
+        </div>
+        <div class="music-controls">
+            <input type="file" id="musicFile" class="music-file-input" accept="audio/*" multiple>
+            <div class="music-buttons">
+                <button id="prevBtn" class="music-button secondary" disabled>⏮️</button>
+                <button id="playBtn" class="music-button" disabled>▶️</button>
+                <button id="pauseBtn" class="music-button" disabled>⏸️</button>
+                <button id="stopBtn" class="music-button" disabled>⏹️</button>
+                <button id="nextBtn" class="music-button secondary" disabled>⏭️</button>
+            </div>
+            <div class="playlist-controls">
+                <button id="shuffleBtn" class="music-button secondary" disabled>🔀</button>
+                <button id="repeatBtn" class="music-button secondary" disabled>🔁</button>
+            </div>
+            <div class="volume-control">
+                <span>🔊</span>
+                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="0.7">
+            </div>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="music-time">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            <div class="playlist" id="playlist">
+                <!-- เพลย์ลิสต์จะถูกเพิ่มที่นี่โดย JavaScript -->
+            </div>
+            <div class="playlist-count" id="playlistCount">ไม่มีเพลงในเพลย์ลิสต์</div>
+        </div>
+        <div class="music-info" id="musicInfo">ยังไม่ได้เลือกเพลง</div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/page1.js"></script>
+    <script src="scripts/page2.js"></script>
+    <script src="scripts/page3.js"></script>
+    <script src="scripts/music-player.js"></script>
+    <script src="scripts/voice-recognition.js"></script>
+</body>
+</html>
